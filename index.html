@@ -1,222 +1,210 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lista de UIDs - Free Fire - @chazin999</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lista de UIDs — Free Fire</title>
+
 <style>
     body {
-        font-family: 'Poppins', sans-serif;
-        background: linear-gradient(135deg, #111, #222);
+        font-family: Arial, sans-serif;
+        background: #0f0f0f;
         color: #fff;
         margin: 0;
         padding: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-height: 100vh;
-        overflow-y: scroll;
     }
 
     h1 {
-        margin-top: 20px;
-        font-size: 2em;
         text-align: center;
-        color: #00ffcc;
-        text-shadow: 0 0 10px #00ffcc;
+        padding: 20px;
+        font-size: 28px;
+        color: #00eaff;
     }
 
     .container {
-        background: rgba(255, 255, 255, 0.05);
+        max-width: 750px;
+        margin: auto;
+        background: #1b1b1b;
         padding: 20px;
-        border-radius: 15px;
-        width: 90%;
-        max-width: 600px;
-        margin-bottom: 40px;
+        border-radius: 12px;
+        box-shadow: 0 0 15px #00eaff55;
     }
 
-    .add-section {
+    .add-box {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
         gap: 10px;
         margin-bottom: 20px;
+        flex-wrap: wrap;
     }
 
     input {
-        background: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 10px;
         padding: 10px;
-        color: #fff;
+        border: none;
+        border-radius: 6px;
+        outline: none;
+        font-size: 15px;
         flex: 1;
-        min-width: 120px;
     }
 
     button {
-        background: #00ffcc;
-        color: #000;
+        background: #00eaff;
         border: none;
-        padding: 10px 15px;
-        border-radius: 10px;
+        padding: 10px 18px;
+        font-size: 15px;
+        border-radius: 6px;
         cursor: pointer;
         font-weight: bold;
-        transition: 0.3s;
     }
 
     button:hover {
-        background: #00cca3;
+        background: #00bcd4;
     }
 
-    .uid-list {
-        max-height: 400px;
-        overflow-y: auto;
-        padding-right: 10px;
+    .list {
+        margin-top: 10px;
     }
 
-    .uid-item {
+    .item {
+        background: #262626;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 12px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        padding: 10px 15px;
-        margin-bottom: 10px;
-        gap: 10px;
+        box-shadow: 0px 0px 8px #00eaff35;
+    }
+
+    .uid {
+        font-size: 18px;
+        font-weight: bold;
+        color: #00eaff;
+    }
+
+    .time {
+        font-size: 16px;
+        margin-top: 5px;
     }
 
     .expired {
-        color: red;
+        color: red !important;
         font-weight: bold;
     }
 
-    .delete-btn {
-        background: transparent;
+    .trash {
+        background: red;
+        color: white;
         border: none;
-        color: #ff4444;
-        font-size: 20px;
+        padding: 8px 12px;
+        border-radius: 6px;
         cursor: pointer;
-        transition: 0.2s;
+        font-weight: bold;
     }
 
-    .delete-btn:hover {
-        color: #ff0000;
-        transform: scale(1.15);
-    }
-
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #00ffcc;
-        border-radius: 10px;
+    .trash:hover {
+        background: darkred;
     }
 </style>
 </head>
+
 <body>
 
-<h1>Lista de UIDs - Free Fire 🔥</h1>
+<h1>Lista de UIDs — Free Fire</h1>
 
 <div class="container">
-    <div class="add-section">
-        <input type="text" id="uid" placeholder="Digite o UID">
-        <input type="number" id="dias" placeholder="Dias" min="0">
-        <input type="number" id="horas" placeholder="Horas" min="0" max="23">
-        <input type="number" id="minutos" placeholder="Minutos" min="0" max="59">
-        <button onclick="adicionarUID()">Adicionar</button>
+
+    <div class="add-box">
+        <input id="uidInput" type="number" placeholder="UID do jogador">
+        <input id="daysInput" type="number" placeholder="Dias" min="0">
+        <input id="hoursInput" type="number" placeholder="Horas" min="0">
+        <input id="minutesInput" type="number" placeholder="Minutos" min="0">
+        <button onclick="addUID()">Adicionar</button>
     </div>
 
-    <div class="uid-list" id="uidList"></div>
+    <div class="list" id="list"></div>
+
 </div>
 
 <script>
-    const uidListEl = document.getElementById("uidList");
-    let uids = JSON.parse(localStorage.getItem("uidsFF")) || [];
+    let items = JSON.parse(localStorage.getItem("uids")) || [];
 
-    function salvar() {
-        localStorage.setItem("uidsFF", JSON.stringify(uids));
+    function save() {
+        localStorage.setItem("uids", JSON.stringify(items));
     }
 
-    function adicionarUID() {
-        const uid = document.getElementById("uid").value.trim();
-        const dias = parseInt(document.getElementById("dias").value) || 0;
-        const horas = parseInt(document.getElementById("horas").value) || 0;
-        const minutos = parseInt(document.getElementById("minutos").value) || 0;
+    function addUID() {
+        const uid = document.getElementById("uidInput").value.trim();
+        const d = parseInt(document.getElementById("daysInput").value || 0);
+        const h = parseInt(document.getElementById("hoursInput").value || 0);
+        const m = parseInt(document.getElementById("minutesInput").value || 0);
 
-        if (!uid) return alert("Tá faltando o UID aí, meu parça 😭");
+        if (!uid) return alert("Coloque um UID válido!");
 
-        const totalSegundos = dias * 86400 + horas * 3600 + minutos * 60;
-        const expiraEm = Date.now() + totalSegundos * 1000;
+        const totalMs = (d * 24 * 60 + h * 60 + m) * 60 * 1000;
+        const expiresAt = Date.now() + totalMs;
 
-        const novo = { uid, expiraEm };
+        items.push({ uid, expiresAt });
+        save();
+        render();
 
-        uids.push(novo);
-        salvar();
-        renderUID(novo);
-
-        document.getElementById("uid").value = "";
-        document.getElementById("dias").value = "";
-        document.getElementById("horas").value = "";
-        document.getElementById("minutos").value = "";
+        document.getElementById("uidInput").value = "";
     }
 
-    function removerUID(item, div) {
-        uids = uids.filter(x => !(x.uid === item.uid && x.expiraEm === item.expiraEm));
-        salvar();
-        div.remove();
+    function removeUID(index) {
+        if (confirm("Tem certeza que deseja remover este UID?")) {
+            items.splice(index, 1);
+            save();
+            render();
+        }
     }
 
-    function renderUID(item) {
-        const div = document.createElement("div");
-        div.className = "uid-item";
+    function render() {
+        const list = document.getElementById("list");
+        list.innerHTML = "";
 
-        const spanUID = document.createElement("span");
-        spanUID.textContent = "UID: " + item.uid;
+        items.forEach((item, index) => {
+            const div = document.createElement("div");
+            div.className = "item";
 
-        const spanTempo = document.createElement("span");
+            let remaining = item.expiresAt - Date.now();
 
-        const deleteBtn = document.createElement("button");
-        deleteBtn.innerHTML = "🗑️";
-        deleteBtn.className = "delete-btn";
-        deleteBtn.onclick = () => removerUID(item, div);
+            let content = `<div>
+                <div class="uid">UID: ${item.uid}</div>`;
 
-        div.appendChild(spanUID);
-        div.appendChild(spanTempo);
-        div.appendChild(deleteBtn);
+            if (remaining > 0) {
+                let sec = Math.floor(remaining / 1000);
+                let min = Math.floor(sec / 60);
+                let hrs = Math.floor(min / 60);
+                let days = Math.floor(hrs / 24);
 
-        uidListEl.appendChild(div);
+                sec %= 60;
+                min %= 60;
+                hrs %= 24;
 
-        atualizarContagem(spanTempo, item.expiraEm, deleteBtn);
-    }
-
-    function atualizarContagem(el, fim, deleteBtn) {
-        const timer = setInterval(() => {
-            const agora = Date.now();
-            const resto = Math.floor((fim - agora) / 1000);
-
-            if (resto <= 0) {
-                el.textContent = "EXPIRADO";
-                el.classList.add("expired");
-                deleteBtn.style.color = "red";
-                deleteBtn.style.display = "block";
-                clearInterval(timer);
-                return;
+                content += `<div class="time">Expira em: ${days}d ${hrs}h ${min}m ${sec}s</div>`;
+            } else {
+                content += `<div class="time expired">EXPIRADO</div>`;
             }
 
-            const d = Math.floor(resto / 86400);
-            const h = Math.floor((resto % 86400) / 3600);
-            const m = Math.floor((resto % 3600) / 60);
-            const s = resto % 60;
+            content += `</div>`;
 
-            el.textContent = `${d}d ${h}h ${m}m ${s}s`;
-        }, 1000);
+            div.innerHTML = content;
+
+            // botão remover
+            const btn = document.createElement("button");
+            btn.className = "trash";
+            btn.innerText = "🗑";
+            btn.onclick = () => removeUID(index);
+
+            div.appendChild(btn);
+            list.appendChild(div);
+        });
     }
 
-    function carregarTudo() {
-        uids.forEach(x => renderUID(x));
-    }
+    // Atualiza o contador a cada 1s
+    setInterval(render, 1000);
 
-    carregarTudo();
+    render();
 </script>
 
 </body>
