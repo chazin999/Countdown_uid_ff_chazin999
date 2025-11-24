@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de UIDs - Free Fire</title>
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #111, #222);
+        color: #fff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        overflow-y: scroll;
+    }
+
+    h1 {
+        margin-top: 20px;
+        font-size: 2em;
+        text-align: center;
+        color: #00ffcc;
+        text-shadow: 0 0 10px #00ffcc;
+    }
+
+    .container {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 600px;
+        margin-bottom: 40px;
+    }
+
+    .add-section {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    input {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 10px;
+        padding: 10px;
+        color: #fff;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    button {
+        background: #00ffcc;
+        color: #000;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #00cca3;
+    }
+
+    .uid-list {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    .uid-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+    }
+
+    .expired {
+        color: red;
+        font-weight: bold;
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #00ffcc;
+        border-radius: 10px;
+    }
+</style>
+</head>
+<body>
+
+<h1>Lista de UIDs - Free Fire 🔥</h1>
+
+<div class="container">
+    <div class="add-section">
+        <input type="text" id="uid" placeholder="Digite o UID">
+        <input type="number" id="dias" placeholder="Dias" min="0">
+        <input type="number" id="horas" placeholder="Horas" min="0" max="23">
+        <input type="number" id="minutos" placeholder="Minutos" min="0" max="59">
+        <button onclick="adicionarUID()">Adicionar</button>
+    </div>
+
+    <div class="uid-list" id="uidList"></div>
+</div>
+
+<script>
+    const uidListEl = document.getElementById("uidList");
+    let uids = JSON.parse(localStorage.getItem("uidsFF")) || [];
+
+    function salvar() {
+        localStorage.setItem("uidsFF", JSON.stringify(uids));
+    }
+
+    function adicionarUID() {
+        const uid = document.getElementById("uid").value.trim();
+        const dias = parseInt(document.getElementById("dias").value) || 0;
+        const horas = parseInt(document.getElementById("horas").value) || 0;
+        const minutos = parseInt(document.getElementById("minutos").value) || 0;
+
+        if (!uid) return alert("Mano… coloca um UID aí né 😭");
+
+        const totalSegundos = dias * 86400 + horas * 3600 + minutos * 60;
+        const expiraEm = Date.now() + totalSegundos * 1000;
+
+        const novo = {
+            uid,
+            expiraEm
+        };
+
+        uids.push(novo);
+        salvar();
+        renderUID(novo);
+
+        document.getElementById("uid").value = "";
+        document.getElementById("dias").value = "";
+        document.getElementById("horas").value = "";
+        document.getElementById("minutos").value = "";
+    }
+
+    function renderUID(item) {
+        const div = document.createElement("div");
+        div.className = "uid-item";
+
+        const spanUID = document.createElement("span");
+        spanUID.textContent = "UID: " + item.uid;
+
+        const spanTempo = document.createElement("span");
+
+        div.appendChild(spanUID);
+        div.appendChild(spanTempo);
+        uidListEl.appendChild(div);
+
+        atualizarContagem(spanTempo, item.expiraEm);
+    }
+
+    function atualizarContagem(el, fim) {
+        const timer = setInterval(() => {
+            const agora = Date.now();
+            const resto = Math.floor((fim - agora) / 1000);
+
+            if (resto <= 0) {
+                el.textContent = "EXPIRADO";
+                el.classList.add("expired");
+                clearInterval(timer);
+                return;
+            }
+
+            const d = Math.floor(resto / 86400);
+            const h = Math.floor((resto % 86400) / 3600);
+            const m = Math.floor((resto % 3600) / 60);
+            const s = resto % 60;
+
+            el.textContent = `${d}d ${h}h ${m}m ${s}s`;
+        }, 1000);
+    }
+
+    function carregarTudo() {
+        uids.forEach(x => renderUID(x));
+    }
+
+    carregarTudo();
+</script>
+
+</body>
+</html>
