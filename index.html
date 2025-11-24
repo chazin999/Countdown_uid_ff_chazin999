@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lista de UIDs — Free Fire - @chazib999</title>
+<title>Lista de UIDs — Free Fire</title>
+
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -12,12 +13,14 @@
         margin: 0;
         padding: 0;
     }
+
     h1 {
         text-align: center;
         padding: 20px;
         font-size: 28px;
         color: #00eaff;
     }
+
     .container {
         max-width: 750px;
         margin: auto;
@@ -26,12 +29,14 @@
         border-radius: 12px;
         box-shadow: 0 0 15px #00eaff55;
     }
+
     .add-box {
         display: flex;
         gap: 10px;
         margin-bottom: 20px;
         flex-wrap: wrap;
     }
+
     input {
         padding: 10px;
         border: none;
@@ -40,6 +45,7 @@
         font-size: 15px;
         flex: 1;
     }
+
     button {
         background: #00eaff;
         border: none;
@@ -49,14 +55,17 @@
         cursor: pointer;
         font-weight: bold;
     }
+
     button:hover {
         background: #00bcd4;
     }
+
     .list {
         margin-top: 10px;
         max-height: 400px;
         overflow-y: auto;
     }
+
     .item {
         background: #262626;
         padding: 15px;
@@ -67,19 +76,23 @@
         align-items: center;
         box-shadow: 0px 0px 8px #00eaff35;
     }
+
     .uid {
         font-size: 18px;
         font-weight: bold;
         color: #00eaff;
     }
+
     .time {
         font-size: 16px;
         margin-top: 5px;
     }
+
     .expired {
         color: red !important;
         font-weight: bold;
     }
+
     .trash {
         background: red;
         color: white;
@@ -89,14 +102,89 @@
         cursor: pointer;
         font-weight: bold;
     }
+
     .trash:hover {
         background: darkred;
     }
+
+    /* MODAL BONITO */
+    .modal-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000000aa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        display: none;
+    }
+
+    .modal-box {
+        background: #1f1f1f;
+        padding: 25px;
+        border-radius: 12px;
+        text-align: center;
+        width: 300px;
+        box-shadow: 0 0 12px #00eaff66;
+        animation: fade 0.2s ease;
+    }
+
+    @keyframes fade {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-box h2 {
+        margin: 0 0 15px 0;
+        color: #00eaff;
+        font-size: 22px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .btn-cancelar {
+        background: #555;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: white;
+        font-weight: bold;
+    }
+
+    .btn-confirmar {
+        background: red;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: white;
+        font-weight: bold;
+    }
+
+    .btn-cancelar:hover {
+        background: #444;
+    }
+
+    .btn-confirmar:hover {
+        background: #b30000;
+    }
 </style>
+
 </head>
 <body>
-<h1>Lista de UIDs — Free Fire</h1>
+
+<h1>Lista de UIDs — Free Fire - @chazin999</h1>
+
 <div class="container">
+
     <div class="add-box">
         <input id="uidInput" type="number" placeholder="UID do jogador">
         <input id="daysInput" type="number" placeholder="Dias" min="0">
@@ -104,11 +192,28 @@
         <input id="minutesInput" type="number" placeholder="Minutos" min="0">
         <button onclick="addUID()">Adicionar</button>
     </div>
+
     <div class="list" id="list"></div>
+
+</div>
+
+<!-- POPUP DE CONFIRMAÇÃO -->
+<div id="confirmModal" class="modal-bg">
+    <div class="modal-box">
+        <h2>Remover UID?</h2>
+        <p style="color:#ccc;">Essa ação não pode ser desfeita.</p>
+
+        <div class="modal-buttons">
+            <button class="btn-cancelar" onclick="closeModal()">Cancelar</button>
+            <button class="btn-confirmar" onclick="confirmDelete()">Remover</button>
+        </div>
+    </div>
 </div>
 
 <script>
+
     let items = JSON.parse(localStorage.getItem("uids")) || [];
+    let deleteIndex = null;
 
     function save() {
         localStorage.setItem("uids", JSON.stringify(items));
@@ -128,15 +233,27 @@
         items.push({ uid, expiresAt });
         save();
         render();
+
         document.getElementById("uidInput").value = "";
     }
 
     function removeUID(index) {
-        const confirmar = confirm("Tem certeza que deseja remover este UID?");
-        if (!confirmar) return;
-        items.splice(index, 1);
-        save();
-        render();
+        deleteIndex = index;
+        document.getElementById("confirmModal").style.display = "flex";
+    }
+
+    function closeModal() {
+        deleteIndex = null;
+        document.getElementById("confirmModal").style.display = "none";
+    }
+
+    function confirmDelete() {
+        if (deleteIndex !== null) {
+            items.splice(deleteIndex, 1);
+            save();
+            render();
+        }
+        closeModal();
     }
 
     function render() {
@@ -154,7 +271,6 @@
 
             const timeSpan = document.createElement("div");
             timeSpan.className = "time";
-
             content.appendChild(uidSpan);
             content.appendChild(timeSpan);
 
@@ -191,6 +307,8 @@
     }
 
     render();
+
 </script>
+
 </body>
 </html>
