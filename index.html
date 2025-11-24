@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lista de UIDs - Free Fire @chazin999</title>
+<title>Lista de UIDs - Free Fire</title>
 <style>
     body {
         font-family: 'Poppins', sans-serif;
@@ -82,11 +82,26 @@
         border-radius: 10px;
         padding: 10px 15px;
         margin-bottom: 10px;
+        gap: 10px;
     }
 
     .expired {
         color: red;
         font-weight: bold;
+    }
+
+    .delete-btn {
+        background: transparent;
+        border: none;
+        color: #ff4444;
+        font-size: 20px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .delete-btn:hover {
+        color: #ff0000;
+        transform: scale(1.15);
     }
 
     ::-webkit-scrollbar {
@@ -128,15 +143,12 @@
         const horas = parseInt(document.getElementById("horas").value) || 0;
         const minutos = parseInt(document.getElementById("minutos").value) || 0;
 
-        if (!uid) return alert("Mano… coloca um UID aí né 😭");
+        if (!uid) return alert("Tá faltando o UID aí, meu parça 😭");
 
         const totalSegundos = dias * 86400 + horas * 3600 + minutos * 60;
         const expiraEm = Date.now() + totalSegundos * 1000;
 
-        const novo = {
-            uid,
-            expiraEm
-        };
+        const novo = { uid, expiraEm };
 
         uids.push(novo);
         salvar();
@@ -148,6 +160,12 @@
         document.getElementById("minutos").value = "";
     }
 
+    function removerUID(item, div) {
+        uids = uids.filter(x => !(x.uid === item.uid && x.expiraEm === item.expiraEm));
+        salvar();
+        div.remove();
+    }
+
     function renderUID(item) {
         const div = document.createElement("div");
         div.className = "uid-item";
@@ -157,14 +175,21 @@
 
         const spanTempo = document.createElement("span");
 
+        const deleteBtn = document.createElement("button");
+        deleteBtn.innerHTML = "🗑️";
+        deleteBtn.className = "delete-btn";
+        deleteBtn.onclick = () => removerUID(item, div);
+
         div.appendChild(spanUID);
         div.appendChild(spanTempo);
+        div.appendChild(deleteBtn);
+
         uidListEl.appendChild(div);
 
-        atualizarContagem(spanTempo, item.expiraEm);
+        atualizarContagem(spanTempo, item.expiraEm, deleteBtn);
     }
 
-    function atualizarContagem(el, fim) {
+    function atualizarContagem(el, fim, deleteBtn) {
         const timer = setInterval(() => {
             const agora = Date.now();
             const resto = Math.floor((fim - agora) / 1000);
@@ -172,6 +197,8 @@
             if (resto <= 0) {
                 el.textContent = "EXPIRADO";
                 el.classList.add("expired");
+                deleteBtn.style.color = "red";
+                deleteBtn.style.display = "block";
                 clearInterval(timer);
                 return;
             }
